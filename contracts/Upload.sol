@@ -9,12 +9,23 @@ contract Upload {
          bool access;  // true, or false
      }
 
+     struct User{
+        address add;
+        uint256 id;
+        uint256 lenOfData;
+     }
+
      struct buyRequest{
          uint256 id;
          address user;
          uint256 dealAmount; 
          bool closed;  // true of false
      }
+
+     User[] userArray;
+     uint256 numUsers = 0;
+     mapping (address => uint256) addressIdMapping;
+     
 
      mapping(address => string[]) dataList;   // stores an array of ipfs urls uploaded by a particular address
 
@@ -28,7 +39,21 @@ contract Upload {
 
      // upload urls from an account 
      function add(address _user, string memory _url) external {
-         dataList[_user].push(_url);
+        if(dataList[_user].length == 0)
+        {
+            addressIdMapping[_user] = numUsers;
+            dataList[_user].push(_url);
+            userArray.push(User(_user,  numUsers,  1));
+
+            numUsers++;
+        }
+        else 
+        {
+            dataList[_user].push(_url);
+            userArray[addressIdMapping[_user]].lenOfData++;
+        }
+
+         
      }
 
 
@@ -122,6 +147,11 @@ contract Upload {
     // 2.3) return the length of datapoints present in the account of (_user)
     function displayDataLength(address _user) public view returns( uint256 ){
          return dataList[_user].length;
+    }
+
+    function displayUsers () public view returns (User[] memory)
+    {
+        return userArray;
     }
      
     function chk () public view returns( uint ){
